@@ -3,12 +3,13 @@ package com.example.mensajesauto
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.util.Log  // 🔹 Importación agregada
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 
 class MainActivity : AppCompatActivity() {
 
@@ -32,33 +33,36 @@ class MainActivity : AppCompatActivity() {
 
         // Botón para guardar número y mensaje
         saveButton.setOnClickListener {
-            val phoneNumber = phoneNumberInput.text.toString()
-            val message = messageInput.text.toString()
+            val phoneNumber = phoneNumberInput.text.toString().trim()
+            val message = messageInput.text.toString().trim()
 
             if (phoneNumber.isNotEmpty() && message.isNotEmpty()) {
                 sharedPref.savePhoneNumber(phoneNumber)
                 sharedPref.saveMessage(message)
                 Toast.makeText(this, "Configuración guardada", Toast.LENGTH_SHORT).show()
+                Log.d("MainActivity", "Número y mensaje guardados correctamente") // ✅ Log funcionando
             } else {
-                Toast.makeText(this, "Por favor, ingrese todos los campos", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Ingrese un número y mensaje válidos", Toast.LENGTH_SHORT).show()
             }
         }
 
-        // Solicitar permisos
         requestPermissions()
     }
 
     private fun requestPermissions() {
         val permissions = arrayOf(
             Manifest.permission.READ_PHONE_STATE,
-            Manifest.permission.SEND_SMS,
-            Manifest.permission.RECEIVE_SMS
+            Manifest.permission.SEND_SMS
         )
 
-        if (!permissions.all {
-                ActivityCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED
-            }) {
-            ActivityCompat.requestPermissions(this, permissions, 1)
+        if (!permissions.all { ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED }) {
+            registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { result ->
+                if (result.all { it.value }) {
+                    Toast.makeText(this, "Permisos concedidos", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(this, "Permisos denegados. La app podría no funcionar correctamente.", Toast.LENGTH_LONG).show()
+                }
+            }.launch(permissions)
         }
     }
 }

@@ -1,25 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="20dp">
+    android:padding="16dp">
 
+    <!-- Campo para ingresar el número de teléfono -->
     <EditText
         android:id="@+id/phoneNumberInput"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Número de teléfono" />
+        android:hint="Número de teléfono"
+        android:inputType="phone" />
 
+    <!-- Campo para ingresar el mensaje de respuesta -->
     <EditText
         android:id="@+id/messageInput"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Mensaje automático" />
+        android:hint="Mensaje de respuesta"
+        android:inputType="textMultiLine"
+        android:minLines="3" />
 
+    <!-- Botón para guardar la configuración -->
     <Button
         android:id="@+id/saveButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Guardar" />
+        android:text="Guardar Configuración"
+        android:layout_marginTop="16dp"/>
+
+    <!-- Botón para probar el envío de SMS -->
+    <Button
+        android:id="@+id/sendTestSmsButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Probar SMS"
+        android:layout_marginTop="16dp"/>
 </LinearLayout>
