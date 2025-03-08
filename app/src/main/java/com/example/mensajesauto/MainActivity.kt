@@ -3,50 +3,71 @@ package com.example.mensajesauto
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.util.Log  // 🔹 Importación agregada
-import android.widget.Button
-import android.widget.EditText
 import android.widget.Toast
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : ComponentActivity() {
 
-    private lateinit var phoneNumberInput: EditText
-    private lateinit var messageInput: EditText
-    private lateinit var saveButton: Button
     private lateinit var sharedPref: SharedPrefManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-
-        phoneNumberInput = findViewById(R.id.phoneNumberInput)
-        messageInput = findViewById(R.id.messageInput)
-        saveButton = findViewById(R.id.saveButton)
         sharedPref = SharedPrefManager(this)
 
-        // Cargar valores guardados
-        phoneNumberInput.setText(sharedPref.getPhoneNumber())
-        messageInput.setText(sharedPref.getMessage())
-
-        // Botón para guardar número y mensaje
-        saveButton.setOnClickListener {
-            val phoneNumber = phoneNumberInput.text.toString().trim()
-            val message = messageInput.text.toString().trim()
-
-            if (phoneNumber.isNotEmpty() && message.isNotEmpty()) {
-                sharedPref.savePhoneNumber(phoneNumber)
-                sharedPref.saveMessage(message)
-                Toast.makeText(this, "Configuración guardada", Toast.LENGTH_SHORT).show()
-                Log.d("MainActivity", "Número y mensaje guardados correctamente") // ✅ Log funcionando
-            } else {
-                Toast.makeText(this, "Ingrese un número y mensaje válidos", Toast.LENGTH_SHORT).show()
-            }
+        setContent {
+            AppUI()
         }
 
         requestPermissions()
+    }
+
+    @Composable
+    fun AppUI() {
+        var phoneNumber by rememberSaveable { mutableStateOf(sharedPref.getPhoneNumber()) }
+        var message by rememberSaveable { mutableStateOf(sharedPref.getMessage()) }
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Text(text = "Configuración de Respuesta Automática", style = MaterialTheme.typography.headlineMedium)
+
+            OutlinedTextField(
+                value = phoneNumber,
+                onValueChange = { phoneNumber = it },
+                label = { Text("Número de teléfono") },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            OutlinedTextField(
+                value = message,
+                onValueChange = { message = it },
+                label = { Text("Mensaje de respuesta") },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Button(
+                onClick = {
+                    sharedPref.savePhoneNumber(phoneNumber)
+                    sharedPref.saveMessage(message)
+                    Toast.makeText(this@MainActivity, "Configuración guardada", Toast.LENGTH_SHORT).show()
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Guardar")
+            }
+        }
     }
 
     private fun requestPermissions() {
@@ -57,9 +78,7 @@ class MainActivity : AppCompatActivity() {
 
         if (!permissions.all { ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED }) {
             registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { result ->
-                if (result.all { it.value }) {
-                    Toast.makeText(this, "Permisos concedidos", Toast.LENGTH_SHORT).show()
-                } else {
+                if (!result.all { it.value }) {
                     Toast.makeText(this, "Permisos denegados. La app podría no funcionar correctamente.", Toast.LENGTH_LONG).show()
                 }
             }.launch(permissions)

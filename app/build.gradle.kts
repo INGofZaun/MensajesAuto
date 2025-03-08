@@ -37,6 +37,9 @@ android {
     buildFeatures {
         compose = true
     }
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.5.3"
+    }
 }
 
 dependencies {
@@ -47,6 +50,9 @@ dependencies {
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
+
+    // Jetpack Compose Runtime para guardar estados
+    implementation("androidx.compose.runtime:runtime-saveable:1.5.3")
 
     // Material 3 (para Jetpack Compose)
     implementation("androidx.compose.material3:material3:1.2.0")
